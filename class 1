@@ -23,6 +23,25 @@ IAC:
 --- Updating and making modification is easy. You need to just modify the code for what changes you wanna make and then re-apply the code then the env gets updated.
 --- As said you can save this code in you GitHub and you can have version control as well. Also you can who did what changesa and when.
 --- So IAC has solved all the problems that we were facing while doing things manually using aws UI.
-
 --- However, you cannot update all the resources in aws, for some you have to create a new updated resource and then delete the old resource. Like if you wanna chnage the instance type from T2 micro to T2 nano you cannot modify it, you have to create a new insatnce with new type.
---- 
+--- The most popular IAC tool in the market is 'Terrafrom'. Terraform is a cloud agnostic, which means it is independent of any cloud. So, if you can use a tool in AWS, Azure, GCP and any other cloud then is is cloud agnostic.
+------------------
+
+Terraform: 
+Provider:
+--- In terraform the first thing you need to know is provider. Terraform can be used to create infra in different clouds. 
+--- How is terraform is able create infra in different clouds? Because of something called as providers.
+--- Provider is basicall a set of plugins which help terraform to interact with these clouds. There are different types of providers. There is a provider is AWS, a provideer for GCP a provider for Azure and etc. So if you want to create infra on aws use aws provider.
+--- So, how does terraform know whether you have to create resources on aws or gcp or azure or etc? It is using providers.
+--- Now if you look at terrafrom documentation. Search in browser for terraform providers.
+--- Terraform has a registry where it maintains all a lot. It maintains providers, modules, libraries, tasks and etc.
+--- You can see a list of providers like; aws, gcp, azure, kubernetes and etc.
+
+-----------------
+--- Terraform is written in HCL(Hashicorp configuration language).
+--- First always know how to do things manually before learning IAC. 
+--- The code which you write in HCL youc can get it from documentation. And you can modify it.
+
+--- Install Terraform
+--- Intsall Visual Studio
+--- Create a new workspace/folder on your desktop. We can name it, here I am naming as 'terraform-ws'.
