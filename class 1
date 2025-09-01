@@ -1,1 +1,28 @@
+--- Now in cloud/AWS we are seeing a lot of services. Using them you can create different types of resources and all those constitute to your infrastucture.
+--- If I want to deploy a application on aws, I need infra for it. Maybe we need EC2, RDS-aurora, s3 bukets, VPC, EFS, loadbalancer, Auto scaling groups, IAM and etc. These all some under infrastucture category.
+---  One way of creating these resources is manually using UI.
+--- Now you have to deploy this in a dev  env, you have created all of these manually.
+--- Now you have depoy this in one more env may be test env, again you will create all the resources manually. 
+--- If you do manually the frist thing is that it is very time taking and there are chances of errors as well. Espically if you want to create both the envs. with same configurations which is very difficult to do manually.
+--- We might miss some configurations. So it is going to be time taking and error prone.
+--- You have create the env and now you have to destroy the env, you have to manually go and delete all the things. Aslo many resources are dependent on each other. Like you cannot delete a VPC with ec2 running on the network. So you have to go and first delete the instance and then delete the VPC. So it is hard to delete them manually.
+--- Now, if you forgot to delete a resource and you might be charged and etc.
+--- Maybe your client asked you to make some configuration changes, maybe change then instance from T2 medium to T2 large. May be want to add more permissions in the IAM roles or any other modifications. 
+--- Now imagine you have to do all those changes manually. Also may be after 1 year you may not remember what chnages you have made, so there is no tracking here.
+--- So there are many issues with doing things manually.
+--- So what is the solution for this? You have something called Infrastucture as Code(IAC).
 
+IAC:
+--- In Infrastucture as code I write a code for creating the infra.
+--- So, we will write the code and deploy that code. An env will be created.
+--- So if you have created a dev env, you can use same code to create test env or another env and deploy it again. Also you can send the code to your team member or push to a remote repo and you team members can use the same code to create the env.
+--- Also there is not chance of error in create new env with same configs.
+--- SO, creation is easy, quick and less errors.
+--- If you want to destroy the env and resources created you can do it with just single command. So all the resource, created using the code will get deleted.
+--- So there is not case of forgeting things and also no issues in deleting the dependencies. So, you have to not worry about which resources has to be deleted first.
+--- Updating and making modification is easy. You need to just modify the code for what changes you wanna make and then re-apply the code then the env gets updated.
+--- As said you can save this code in you GitHub and you can have version control as well. Also you can who did what changesa and when.
+--- So IAC has solved all the problems that we were facing while doing things manually using aws UI.
+
+--- However, you cannot update all the resources in aws, for some you have to create a new updated resource and then delete the old resource. Like if you wanna chnage the instance type from T2 micro to T2 nano you cannot modify it, you have to create a new insatnce with new type.
+--- 
