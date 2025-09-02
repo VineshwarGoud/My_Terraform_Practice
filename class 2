@@ -76,4 +76,41 @@ resource "aws_instance" "myec2" {
 
 --- You can go and check in aws console you can see the new instance got created.
 --- Now the thing is that you have just added a new resource and terraform is updating your environment. It is not doing anything with the s3 bucket, since it knows that it is already exists.
+--- You can also modify the code, the resources maybe you can chance the instance type from t2.micro to t2.nano and do terraform plan. But remember if you do that you will be charged by aws since t2.nano is not under free tier.
+--- Also, it is not a good practice to modify any resource from aws console if is created using terraform.
+--- Also, if you do instance tpe change the instance has to be stopped first, then change the instance type and then restart the instance the same happens with terraform as well. It will stop the instance first and then it will change the instance type.
+--- Also you can see the public IP of the instance is changed. Since the instance is stopped and restarted.
+
+
+--- Now how does terraform knows that wether it has to create something or whether modify something?
+--- Here we have first created only 1 resource S3, then we created a resource aws_instance and then we modified the resource.
+--- How does the terraform knwo that what are already present and only whats needs to be added or modified?
+--- The answer is state file. 
+--- You can see a new file got created, which is 'terraform.tfstate'. Which got created as soon as we did terraform apply.
+--- So it got created when we did our first terraform apply to create s3 bucket.
+--- This 'terraform.tfstate' is managing the state of your resource.
+--- If you open 'terraform.tfstate' file. You can see the details of all the resources which your terraform is managing.
+--- currently we have 2resources, one is s3 bucket and the other is ec2. So as soon as you do terraform apply,this terraform.tfstate file gets updated and this terraform.tfstate file is managing your resources.
+--- If you see in the terraform.tfstate file you can see all the detailed and state of the resources you have created and running. You can see every detail of the resources.
+--- So this is how your terrafrom knows that wether it has to create or delete or update something. 
+
+--- Now lets create a new bucket add this in the main.tf code
+
+resource "aws_s3_bucket" "mynews3" {
+    bucket = "mynewbucket26856"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+--- Now if you do terraform plan and terraform apply.
+--- Now as soon as you did terraform plan it says that a the new s3 bucket will be created. So what did terraform do?
+--- It checked the code, it compared it with the tfstate file and it found that in tfstate there are only 2 resources myfirstbucket and myec2. So it compared and there is one extra resource, so it requested aws and from aws it brough the details about what is the actual situation on aws.
+--- On aws we do not have this new bucket so it decided that this new bucket as to be created.
+--- So, whenever you do terraform apply, aws create a resource on cloud and then it comes and updates all about it in tfstate file. So, everytime your tfstate file going to match with the actaul state of resources on AWS.
+--- Even when we did modification of instance type it did the 3 way comparision of code, tfstate and aws. Then it updated accordingly.
+--- Now tfstate file is very important, if is deleted terraform does not know which resource is running, which is needs to be modifed as it lost all the detailed.
+--- If the tfstate is delete if you run the code it will again create all the resources since it doesnot have the infromation that what you have on aws already. SO it wil try to create all the resources again.
 --- 
