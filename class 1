@@ -107,4 +107,4 @@ provider "aws" {
 --- When you did terraform init you can see a '.terraform' folder got created and '.terraform .lock.hcl' file got created.
 --- In '.terraform' folder you have licenses and provider got downloaded.
 
---------------------- end of class 1 of terraform
+--------------------- End of class 1 of terraform
