@@ -113,4 +113,287 @@ resource "aws_s3_bucket" "mynews3" {
 --- Even when we did modification of instance type it did the 3 way comparision of code, tfstate and aws. Then it updated accordingly.
 --- Now tfstate file is very important, if is deleted terraform does not know which resource is running, which is needs to be modifed as it lost all the detailed.
 --- If the tfstate is delete if you run the code it will again create all the resources since it doesnot have the infromation that what you have on aws already. SO it wil try to create all the resources again.
---- 
+--- Now if you wanna remove a resource, just remove the resource from the code and do terraform apply.
+--- If you want to delete all the resources you can just do terrafrom destroy.
+-----------------------
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = "myfirstbucket26856"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+resource "aws_instance" "myec2" {
+    ami = "ami-0861f4e788f5069dd"
+    instance_type = "t2.mirco"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+--- Now we are writing the code but let us not talk about good practices and how to enchace the terraform code.
+
+--- Now if you see the code we have hardcoded some stuff in the code. Like instance type, AMI id and etc.
+--- But we do not want to hard code things. 
+--- So we will create a block called 'variables'. 
+
+--- variables "name of the varible" {}. So we can do it:
+
+variables "ami_id" {
+   type = string  ### type is data type - like string, boolean and etc.
+}
+
+variables "instance_type" {
+   type = string  ### type is data type - like string, boolean and etc.
+}
+
+variables "bucket_name" {
+   type = string  ### type is data type - like string, boolean and etc.
+}
+
+--- So we have created two variables for ami_id and instance_type.
+--- So basically we are declaring the variable that the variable name is ami_id and type is string.
+--- Now we can give this variables default values. If you do not give the default value, then you have to pass the value while doing terrafrom apply.
+--- Now lets remove the hardcoding. Before we remove the value save the values somehere, so that you can use them to pass during terrafrom apply..
+--- So the final code is : 
+
+variables "ami_id" {
+   type = string
+}
+
+variables "instance_type" {
+   type = string  
+}
+
+variables "bucket_name" {
+   type = string
+}
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = var.bucket_name
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+resource "aws_instance" "myec2" {
+    ami = var.ami_id
+    instance_type = var.instance_type
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+--- Now do terraform apply.
+--- You will be asked to pass the values enter the values. ami_id, instance_type and bucket_name.
+--- This is a way of doing it.
+--- If you do not want to give values in prompt you can do it while running terraform apply command.
+--- terraform apply -var="bucket_name=name of bucket" -var="ami_id= ami id" -var"instance_type=t2.micro"
+--- Now you are asked for values in prompt. 
+
+--- Now in variables you can give default type also. 
+
+variables "ami_id" {
+   type = string
+   defaul = "ami-0861f4e788f5069dd"
+}
+
+variables "instance_type" {
+   type = string  
+   default = "t2.micro"
+}
+
+variables "bucket_name" {
+   type = string
+}
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = var.bucket_name
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+resource "aws_instance" "myec2" {
+    ami = var.ami_id
+    instance_type = var.instance_type
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+--- Now if you do terraform apply it will not ask to pass the value of ami_id and instance_type. 
+
+--- Now you have a command 'terraform fmt', this will format the code. So, if your code is not formated maybe extra spaces and etc it will format it.
+--- Now you have a command 'Terraform validate', this will check your syntax. Maybe youcan remove a '{' from your code and do terraform validate. It gives you error.
+----------------------------
+
+--- Now similar to variable block we also have output block as well.
+--- If you want some values as output.
+--- Suppose we have created the ec2 instance and we want the private IP of the instance. We want see that when run terrform apply. For that we have output.
+--- Add below to the code.
+
+output "ec2privateIP"{
+   value = aws_instance.myec2.private_ip
+}
+
+output "ec2arn"{
+   value = aws_instance.myec2.arn
+}
+
+--- Here is the full code.
+--- also let us add default value in variables for bucket name.
+
+variables "ami_id" {
+   type = string
+   default = "ami-0861f4e788f5069dd"
+}
+
+variables "instance_type" {
+   type = string  
+   default = "t2.micro"
+}
+
+variables "bucket_name" {
+   type = string
+   default = "myfirstbucket26856"
+}
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = var.bucket_name
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+resource "aws_instance" "myec2" {
+    ami = var.ami_id
+    instance_type = var.instance_type
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+output "ec2privateIP"{
+   value = aws_instance.myec2.private_ip
+}
+
+output "ec2arn"{
+   value = aws_instance.myec2.arn
+}
+
+
+
+--- Now do terraform apply.
+--- You can see the output.
+--------------------
+
+--- We have everything in one file which is main.tf. You can also put even provider into this one file.
+--- But what if my code is very huge it would ve very complex.So, putting all in same file cannot be a good practice.
+--- So, lets keep them in different files.
+
+--- First create 'variables.tf' and we will move all the variables to this file. So, copy and paste it in this file and save it.
+--- Now create 'outputs.tf' and move all the ouputs to this file.
+--- Now main.tf has only resource code. Also it would be easy to understand things.
+--- This would not changes anything. Since when you do terraform apply, terrform will read all the .tf files and executes.
+---------------------
+
+--- Now what if someone do not want to give default values in variables? He would do it in the terminal as we seen before by passing the values. 
+--- But right now we have only 3 variables and what if there are 50 variables? It would be very complex to pass the values in the terminal.
+--- So in terraform we can create a file called 'terraform.tfvars', in this terraform.tfvars we can put our key values.
+
+--- create a file 'terraform.tfvars' ---> it is standard naming, so it has to be 'Terraform.tfvars' only
+--- Now lets put all the values into the folder.
+
+ami_id = "ami-0861f4e788f5069dd"
+instance_type = "t2.micro"
+bucket_name = "myfirstbucket26856"
+
+--- Now do terraform apply.
+
+--- If you do not use the standard naming as 'Terraform.tfvars' but different name. 
+--- Maybe we have created file with name 'myvalues.tfvars'. --->name.tfvars ---> .tfvars is must you cannot change it.
+--- then you can do terraform apply with the following command
+--- terrafrom apply -var-file="myvalues.tfvars"
+-------------------------------------
+
+--- Till now we have seen resource block, variables block, output and now lets see data block.
+--- Lets say there is a resource which is already existing in aws account, which we have not created using terraform or maybe using terrform it doesn't matter. But there is a resource that is existing in your aws account.
+--- And I want to get the value of it.
+--- Example : We have VPC, there is a VPC which is already there and I want to get the value of that VPC. Myabe we want to get the VPC ID of a VPC which is on the AWS accont.
+--- For that we can use the data source, to get the value of something which is already existing.
+--- Now lets say here is Secrets Manager, on aws in secret manager we can store secrets. Where we store some key and values.
+--- First lets create a secret in in secret manager.
+--- Search for secret manager on aws console and then click on it.
+--- Cick on 'Store a new secret' ---> Select 'Other type of secret from the options' ---> In Key/value pair enter "dbpass & gdyefwefbf" ---> Next 
+--- Secret name "mydbpass" ---> Next ---> Next ---> Store.
+--- So, now we have created a secret and now i want to get the value of that secrets in my code.
+--- Maybe I want to create a resource which needs the value of that resource. Maybe I am creating a database and the value of the secret I have to refer from secret manager.
+--- Now, we have not created this secret using terrraform but we have created it manually from console. But we want to extarct some details from it.
+--- So, I will use 'data source'.
+
+---- You can check hwo to write data source from terraform documentation. Search vpc data source terraform.
+
+data "aws_vpc" "vpcdatasource" {
+     id = "give your vpc id" 
+} 
+
+--- So we have provided the value to the data source that I want to extract the value of the VPC which is having certain ID.
+--- If you want to create output vairiable you can create that.
+
+--- Add this to output.tf file 
+
+output "vpc_cidr {
+     value = data.aws_vpc.vpcdatasource.cidr_block"
+}
+
+--- now run terraform apply
+
+--- Now this to your code:
+
+data "aws_secretsmanager_secret" "mysecretname" {
+      name = "mydbpass"
+}
+
+data "aws_secretsmanager_secret_version" "secret-version" {
+      secret_id = data.aws_secretmanager_secret.mysecretname.id
+}
+
+--- Now if we want to get the value of it we can go and create it in the output section.
+
+output "mysecretvalue" {
+    value = data.aws_secretsmanager_secret_version.secret-version.secret_string
+    sensitive = true
+}
+
+--- Since we are trying to extarct sensitive information, we are using sensitive = true.
+
+--- Do terraform plan and then terraform apply.
+
+--- So, data source is block which we can use to retrieve the value of something which is already created in aws.
+
+---- DO terraform destroy, this will destory all that we have created so that you won't be charged by aws. 
+
+--------------- End of class 2 of terraform.
