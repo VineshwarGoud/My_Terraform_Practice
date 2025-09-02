@@ -1,1 +1,79 @@
+--- In class one we have seen the intro of IAC and terraform.
+--- Today we will write codes and see how to write a code in terraform.
 
+--- We will creat a file in the 'terraform-ws' folder only, called 'main.tf' and write some content in the file.
+--- Now I want to create a S3 bucket using terraform. So we need to write it in HCL.
+--- In terraform we have different yoes of blocks, first block we are going to see is 'resource block'. So you will write resource in thsi block.
+--- Now lets go to terraform documentation --- browse terraform aws provider --- then search for S3, find what you want to create. As we want to create  aws S3 bucket select it and you can see the example code.
+--- You can use the example and edit it as per your requirements.
+--- Now, every aws resource has a lot of configurations when you create it from console and you can select options.However some option are compulsary, but some are optional and if you do not provide any value/select the option it will take as default options.
+--- So, here in code as well we will provide the mandatory options and for optional we can add them in code if we require them.
+
+--- Now in resourse block you have 
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = "myfirstbucket"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+--- So you want to create a resource with a type here "aws_s3 bucket" with name of resource as "mys3".
+--- "mys3" is not the name of the bucket, it is logical name of the resource.
+--- Then we have have provided required configurations.
+--- bucket = "Myfirstbucket" ---> this is the name we would like to give to the bucket.
+--- Then we have tags.So we have given tags.
+
+--- Now after you have written the code you have come to the terminal option of VA code and run the command 
+
+--- terrafrom plan --- first we have to do 'terrafrom init', we have already done it so we can directly do terform plan.
+
+--- terrafrom plan is going to plan it, it is going to prepare a blueprint. So, it will not create the resources but will tell what resource are going to be created and etc.
+--- So you can look at it and see what it is created and if you are ok with it you can proceed.
+--- Once you are ok with the plan, then you can run the command 'terraform apply' and this will create the resources.
+
+--- terraform apply
+
+--- Now you can go and check in your aws console and see that the s3 bucket with name you have given is created.
+
+--- Now lets create a ec2 instance using terraform.
+--- Go to the terraform documentation and search for ec2 . Select the aws_instance from the options.
+--- Just add this to the existing code in main.tf which we have written for creating s3 bucket.
+
+resource "aws_s3_bucket" "mys3" {
+    bucket = "myfirstbucket26856"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+
+resource "aws_instance" "myec2" {
+    ami = "ami-0861f4e788f5069dd"
+    instance_type = "t2.mirco"
+    tags = {
+        Name = "demoec2instance"
+        Environment = "Dev"
+        Owner = "devopsuser"
+    }
+}
+
+--- we are creating resource type "aws_instance" with the name "myec2".
+--- We have given the ami id which we can get from the aws console when crating the ec2 instance.
+--- also we have given the instance_type as t2.mirco.
+
+--- Now when you do terraform apply, since we already the s3 bucket resource this will not effect it. Now first lest do terraform plan.
+
+--- terraform plan
+
+--- You can see it says that it is going to create a aws-instance.myec2. You can see configurations. Now do terraform apply.
+
+--- terraform apply
+
+--- You can go and check in aws console you can see the new instance got created.
+--- Now the thing is that you have just added a new resource and terraform is updating your environment. It is not doing anything with the s3 bucket, since it knows that it is already exists.
+--- 
