@@ -28,6 +28,7 @@ IAC:
 ------------------
 
 Terraform: 
+
 Provider:
 --- In terraform the first thing you need to know is provider. Terraform can be used to create infra in different clouds. 
 --- How is terraform is able create infra in different clouds? Because of something called as providers.
@@ -37,11 +38,73 @@ Provider:
 --- Terraform has a registry where it maintains all a lot. It maintains providers, modules, libraries, tasks and etc.
 --- You can see a list of providers like; aws, gcp, azure, kubernetes and etc.
 
------------------
+------------------
 --- Terraform is written in HCL(Hashicorp configuration language).
 --- First always know how to do things manually before learning IAC. 
 --- The code which you write in HCL youc can get it from documentation. And you can modify it.
+-------------------
 
+Installations:
 --- Install Terraform
 --- Intsall Visual Studio
---- Create a new workspace/folder on your desktop. We can name it, here I am naming as 'terraform-ws'.
+--- Create a new workspace/folder on your desktop. We can name it, here I am naming as 'terraform-ws'. Then we will be opening that file in VS code.
+--- Install aws cli as we are going to create infra on aws.
+
+--- Configure the CLI.
+--- Till now whenever we wanna create resource, we would login to aws account by using user name and password. Then we start to create aws resources.
+--- Now we are using cli to create or manage aws resources using commands. So if we are trying anything from the command line, so my command line must also be authenticated. So for the we have to create a IAM user.
+--- Create a IAM user on your aws with admin access. Then in aws iam user, in securities create access key.
+--- Now we have to configure this iam user in the aws cli.
+--- In vs code type command 'aws configure', then enter you access key and secret access key. It also asks for defalut region name enter that and default output formate as json.
+--- So your aws cli is configured. To check you can run the command 'aws iam list-users'. This will list the IAM users.
+-------------------
+
+--- Now lets start to know to how to write the terraform code.
+--- As we dicusses earlier that using terraform we can create infra on different clouds. For that we have providers. Terraform gives you different tyoes of providers.
+--- Search 'terraform providers' in browser.
+--- We want to create my resources on AWS, so select aws provider.
+--- At the top right you can see  'use provider' option, click on it and you will get the code. Copy the code.
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.11.0"
+    }
+  }
+}
+
+provider "aws" {
+  # Configuration options
+}
+
+--- In VS code create a file in the terrafrom-ws called 'provider.tf' ad paste the provider code here in the file 'terraform.tf'.
+--- So, we are telling the terraform that we need which version of aws provider.If you do no specify the version of aws provider it will be latest by default.
+--- But mentioning is version is a good practice.
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.11.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+--- In provider "aws" : you have to specify some extra details, like region in which region you want to create the resources.
+--- If you do not provide the region here it will take the default region that we set while configuing the cli.
+--- So, in this provider.tf, we are telling terraform that I want to use provider "aws", below its cofigrations we gave region = "ap-south-1" here. And the version of aws provider is version = "6.11.0"
+--- So, we are done with writing provider.tf. Now lets understand our first terraform command. You need to run these in the terminal option in you VA code editor.
+
+--- in terminal run 'terraform init' command.
+--- terraform init will initialize your terraform. When you do terrafrom init, terraform will look at your provider that you want provider. Here you want aws and vwhich version.
+--- Provider is basically a plugin, so all the plugins and libraries related to provider will get downloaded. So, I am initializing terraform and this is just one-time stuff.
+
+--- When you did terraform init you can see a '.terraform' folder got created and '.terraform .lock.hcl' file got created.
+--- In '.terraform' folder you have licenses and provider got downloaded.
+
+--------------------- end of class 1 of terraform
