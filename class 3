@@ -1,0 +1,101 @@
+--- tfstate is a very critical file, because this tfstate has the information of the resources. ANd whenever you do terraform apply, so this tf state file is checked and this is mathced with the the actual configuration and the terraform decides what to do.
+--- Now what will happen if the tfstate file got deleted? And if you again do terrafrom apply, terraform will create all the resources again. This is since we have deleted the tfstate file and terraform doesn't have the info what is already existing.
+--- SO, you have to store your tfstate file in save place. Now you have it on the laptop and what if the laptop gets crashed or stolen. 
+
+--- In Your project there will be multiple people working in the team. 
+--- If person A has written the terraform code and did terraform apply. Now he has tfstate file on his laptop and resources got created on aws. Now person B wants to update a resource, now if he even gets the code from person or maybe from github, made some chnages to the code and do terraform apply all resources will be created again not just update.
+-- This is since terrafrom.tfstate file of person B does not have any reference of tfstate file of person A. So, this is not good.
+
+--- So, this tfstate file must not be managed locally. It should be managed somewhere on remote.
+--- If person A create some resources on aws the tfstate file on remote will be updated. Maybe store in s3 bucket. So, it is on cloud and is safe, also no need to worry about crash.
+--- Now if person B make some modification and does terraform apply, the terrform knows that what is the state of the resources on aws as tfstate file is store on remote. And modify the resources accordingly.
+--- Now this is called backend, if you store the tfstate file on local it is called local backend and if you store on remote it is called remote backend.
+--- Remote backend can be anything S3 bucket, Azure block storage and you can store it on GitHub also. But we do not store in on GitHub, since it stores contains some secure information.
+--- S3 is the most popular for remote backend.
+--- Now you can delete your tfstate file from the local on VS code. Make sure you run terrafom destroy to make sure no resources are running. 
+--- Now lets create remote backend. Lets use S3 for it.
+
+--- Search terraform backend --> you select terraform docs and see what all kinds of backend are possible. 
+--- We are going to use S3, for that we need to create a s3 bucket first. So, first create s3 bucket on aws with name 'terraform-tfstate' ---> you can give any name you want.
+--- Enable bucket versioning ---> create bucket ---> our bucket got created.
+
+--- Now we have created the bucket but need to tell terraform that what will be the remote backend. So that we need to do some configurations.
+--- Now create a file called 'backend.tf' on you VS code.
+--- Add the below code :
+
+terraform {
+  backend "S3"{
+    bucket = "terraform-tfstate"
+    key = "terraform.tfstate"
+    region = " "
+    encrypt = true
+  }
+}
+
+--- So here we are creating a terraform block,with backend as S3.
+--- Then the bucket name : "terraform-tfstate". Then you have to specify the name of the terrform state file in key, here we are giving it same 'terraform.tfstate' and if you want you can give a different name also.
+--- In region we give the region in which our bucket is present. Then we have option to encrypt.
+--- So we have said terrform that you no longer need to maintain the state file on local, maintain it on S3 as remote backend. In S3 bucket terraform-tfstate and in file terraform.tfstate.
+-------------------------------
+
+--- Now there is one more problem.
+--- Now person A has some code which has a lot of resources which needs to be created, whih would take a lot of time, maybe 15 minutes. So he did terraform apply.
+--- In the mean time while resources of person A were in process of getting created, person B also did terraform apply. 
+--- So, while person A resources were getting created and tfstate file was getting udpdated and now the person B also does some apply at the same time parallely. 
+--- NOw, the tfstate file is inconsistent, now both will try to modify the same tfstate file.
+--- Now if there are 10 people in the team it would lead to inconsistency as sometimes more than 1 persons can try to apply at the same time. This will lead to inconsistency.
+--- So, we do not want multiple people doing it at the same time. So what is the solution?
+--- The solution is to lock the statefile. So, while one person operations are happening, we need lock the tfstate file.
+--- This is called 'state locking'.
+--- Now if we enable state locking if a person is doing terraform apply a lock will be acquired on this tfstate file.
+--- So now in the meantime if any other person trys to do some operations it would give an error that the tfstate files is locked.
+--- After the person A operation is done the lock will be released and person B can do his operations.
+--- This will ensure that only one person can update the tfstate file at-a-time.
+
+--- You have different ways to enable state locking. 
+--- Before terraform 1.11 version, we used to maintain a seprate table for state locking.
+--- In aws we have DynamoDB and DynamoDB could be used for state locking. So you can create a DynamoDB table. 
+--- InDybamoDB ---> create a table with some name and metion that in your code in backend.tf file. So your code looks like : 
+
+terraform {
+  backend "S3"{
+    bucket = "terraform-tfstate"
+    key = "terraform.tfstate"
+    region = " "
+    encrypt = true
+    dynamodb_table = "value"
+  }
+}
+
+--- So your state locking will be managed using DynamoDB table. So, whenever a person does terraform apply a lock file will be created in the DynamoDb table and when the operation is over the lock file will expire.
+
+--- Now this was working fine, but terraform came up with a version of why do we need to use a different resource just to manage the locking and why not S3 handles it. And that's what they did. 
+--- Now, in terraform latest version you do not need to use DynamoDB table for state locking. If you want you can use there us that option. But terrraform has given you a good thing that, for just to maintan the statelocking you can use the same S3 bucket.
+--- For that you just need to add the to the code in backend.tf file. The code would look like 
+terraform {
+  backend "S3"{
+    bucket = "terraform-tfstate"
+    key = "terraform.tfstate"
+    region = " "
+    encrypt = true
+    use_lockfile = true
+  }
+}
+
+--- So just use 'use_lockfile = true', so we are using S3 for locking. 
+--- Still some projects are using DynamoDb and some are using S3 locking.
+-----------------------
+
+Now lets run the code :
+
+--- Now, as we are updating the backend. Now we have made a change earlier our backend was local but now it is remote backend. So if you make change to your backend configuration, in that case you have to run terrfom init first.
+--- terraform init
+--- terraform validate 
+--- terrafrom plan 
+--- terraform apply 
+
+--- Now you can see tfstate file is not getting created on local.
+--- If you check the S3 buclet you can see statefile getting created and you can see lockfile. Since your operation is running so lock file got created to lock it. You can see the lockfile is gone once the apply is done.
+--- You can see statefile in s3 bucket now.
+---------------------------------------------------
+
