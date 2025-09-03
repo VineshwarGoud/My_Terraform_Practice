@@ -97,5 +97,50 @@ Now lets run the code :
 --- Now you can see tfstate file is not getting created on local.
 --- If you check the S3 buclet you can see statefile getting created and you can see lockfile. Since your operation is running so lock file got created to lock it. You can see the lockfile is gone once the apply is done.
 --- You can see statefile in s3 bucket now.
+
+--- terraform destroy
 ---------------------------------------------------
 
+--- Now lets talk about terrafrom workspaces.
+--- It is similar to namespaces in k8s. But here we call it as workspace.
+--- Now I am writing a code to run on dev env, test env and prod env. I will not write a different code for each, I will maintain the same code. 
+--- So, you are creating logical isolation for each env. 
+--- Now might need some modifications to the code for different env. Like maybe we need t2.nano for dev, t2.large for test and t2.xlarge for prod. So, I need to have seprate terraform.tfvars files for each env with seperate configurations.
+
+--- So we will create 3 different files.
+--- First lets create a folder with name 'env-config'.
+--- Now first rename the 'terraform.tfvars' file to 'dev.tfvars'. So this dev.tfvars files will have the values for our dev env.
+--- copy the dev.tfvars file and create test.tfvars and prod.tfvars files in same env-config folder. You can make whatever changes you would like to make the the file. May be we just chnage the bucket name.
+--- So, we have created 3 tfvars files for 3 different envs. ---> you can also create them in same folder or you can create a new folder, we are create env-config folder to make ot easier.
+--- now if you do teeraform apply as below
+--- terraform apply -var-file="env-config/dev.tfvars" ---> this will create the resources based on the configuration.
+--- Now if we want to create resources for test env we havr to do :
+--- terraform apply -var-file="env-config/test.tfvars" ---> this will create the resources based on the configuration.
+--- But this will only modify the existing resources and will not create a new test env. So, it will only modify the existing resources.
+--- This is since terraform doesn't know that whether we are create a prod env ot test env or prod env. For terraform it is just configuration values.
+--- So that what we want only modify the existing resources? No, we want to create a new env.
+--- In that case workspace will help us.
+
+--- So, we will run terraform workspace commands.
+--- terraform workspace show ---> this command will tell you in which workspaces you are in currently.
+--- terraform workspace new dev ---> it will create dev env.
+--- terraform workspace new test ---> it will create test env.
+--- terraform workspace new prod ---> it will create prod env.
+
+--- when you so terraform workspace new command it will switch you to that workspace once it is created.
+--- terraform workspace show ---> this will show you in which workspace you are in.
+--- terraform workspace select dev ---> this command will take you to the dev workspace. 
+--- now from this dev env if I run the below command :
+--- terraform apply -var-file="env-config/dev.tfvars" ---> So this will create resources based on the values of dev.tfvars.
+--- Now if we go and check you statefile which is on S3 as remote backend and refresh it. You can see env:/ folder, if you get into it you can see 3 env folders with names 'dev/', 'test/' and 'prod/'.
+--- If we open them dev/ folder you can see there is a tfstate file, you also have a tfstate file in test/ and also in prod/.So each env has its own tfstate.
+
+--- Now we are in dev env, not if we want to deploy infra on test env.
+--- terraform workspace select test
+--- terraform apply -var-file="env-config/test.tfvars" ---> you can see it is creating fresh resources, it is not modifying it. This is beacuse we are doing it in test workspace.
+--- So for test it is checking the tfstate file which is kept in test/ folder on s3. 
+--- So seprate state files are being maintianed for seperate env.
+----------------------------------
+
+Modules:
+--- Module is to make things re-usable.
