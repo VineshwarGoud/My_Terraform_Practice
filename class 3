@@ -144,3 +144,34 @@ Now lets run the code :
 
 Modules:
 --- Module is to make things re-usable.
+--- Lets say we have 2 teams, team A and team B. Team A is working on APP-A service and team B on APP-B service.
+--- Now APP-A needs infra, now the devops teams will write the terraform code which is required for creating resources. Like ec2 instance, S3 buckets, rds, IAM policies, network configs like VPC, Subnets and etc.
+--- Now team of APP-B will also write the same stuff.
+--- Now both are in same project and both are writing the complete code for creating the infra. Here code re-writing is happening. 
+--- Which mean APP-A and APP-B both are writigng code for ec2 instance, s3, IAM and etc. So it would be better if we make things re-usable.
+
+--- Now normally in DevOps projects, there would be a team called platform team/ Systems team. 
+--- Now this team is reponsible for creating modules for different resources.
+--- So they will write the code in modules, maybe a module to create ec2 instance, one more module for s3, another for IAM and etc.
+--- Now for eg: a ec2 instance module will have full mode of creating a ec2 instance. there will be main.tf, outputs and etc. So, this module wil just create ec2 instance.
+--- Same way s3 will have its module and same for IAM as well or etc.
+--- Now the APP teams doesn't need to write the full code. If they want to create a ec2 instance they are going to source the module, and pass the varibales/values.
+--- So APP-A and APP-B will just have a file with the vars or values to be passed to the module and then module does everything.
+--- So, now APP-A or B teams are not writing the complete code they are just passing the required values and inputs and modules are creating the resources.
+--- So we have inplemented re-usablilty.
+
+--- Now this has one more benefit, which is about consistency. About maintaining the standards.
+--- Now the platform team or systems team is reposibles for manging these modules and they will make these modules standardized. They will use all the good practices of creating resources like; ec2 instance, s3, IAm and etc. 
+--- They will implement them in the modules only.
+--- lets say tomorrow if a new change has come in a resource, maybe a new configuration of s3. Lets say S3 guves a new feature.
+--- Now the code is written in the module. So the platform team will implement it in the module. Then these APP teams, they don't have to worry about it. They just have to use it.
+-------------------------------
+
+--- now lets see some more commands.
+--- terraform workspace select dev
+--- terraform state list ---> it gives you the list of resources which your tfstate file is managing. 
+--- Now if you want to delete only one reource you can use the below command. Lets delete s3 bucket that we  have.
+--- terraform destroy -target <name of the resource you would like to destory> ---> you can get he name of the resource by using the command --- terraform state list ----> using this command you can delete a specific resource using terraform.
+
+--------------- End of class 3 of terraform.
+
